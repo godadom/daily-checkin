@@ -1,4 +1,4 @@
-"""Environment-only configuration for NovalPie's verified check-in API."""
+"""Runtime configuration for NovalPie's verified check-in API."""
 
 from __future__ import annotations
 
@@ -100,13 +100,6 @@ def _accounts(env: Mapping[str, str]) -> tuple[AccountConfig, ...]:
     return accounts
 
 
-def _verified_value(env: Mapping[str, str], name: str, expected: str) -> str:
-    value = env.get(name, expected).strip().rstrip("/") if name == "CHECKIN_BASE_URL" else env.get(name, expected).strip()
-    if value != expected:
-        raise ConfigError(f"{name} must remain the verified NovalPie value")
-    return value
-
-
 def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
     env = os.environ if environ is None else environ
     timezone = env.get("CHECKIN_TIMEZONE", "Asia/Shanghai").strip()
@@ -120,9 +113,9 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
     if notify_mode not in {"log", "off"}:
         raise ConfigError("CHECKIN_NOTIFY_MODE must be log or off")
     return Settings(
-        base_url=_verified_value(env, "CHECKIN_BASE_URL", BASE_URL),
-        status_path=_verified_value(env, "CHECKIN_STATUS_PATH", STATUS_PATH),
-        checkin_path=_verified_value(env, "CHECKIN_ACTION_PATH", ACTION_PATH),
+        base_url=BASE_URL,
+        status_path=STATUS_PATH,
+        checkin_path=ACTION_PATH,
         accounts=_accounts(env),
         connect_timeout=float(_number(env, "CHECKIN_CONNECT_TIMEOUT", "5", float, 0.1, 120)),
         read_timeout=float(_number(env, "CHECKIN_READ_TIMEOUT", "15", float, 0.1, 120)),

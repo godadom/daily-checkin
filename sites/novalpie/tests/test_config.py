@@ -8,9 +8,6 @@ from checkin.config import ACTION_PATH, BASE_URL, STATUS_PATH, ConfigError, load
 
 def env(**overrides):
     values = {
-        "CHECKIN_BASE_URL": BASE_URL,
-        "CHECKIN_STATUS_PATH": STATUS_PATH,
-        "CHECKIN_ACTION_PATH": ACTION_PATH,
         "CHECKIN_TOKEN": "fixture-token",
         "CHECKIN_TIMEZONE": "UTC",
     }
@@ -24,9 +21,20 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(settings.accounts[0].auth_type, "bearer")
         self.assertEqual((settings.base_url, settings.status_path, settings.checkin_path), (BASE_URL, STATUS_PATH, ACTION_PATH))
 
-    def test_rejects_changed_endpoint_invalid_timezone_and_bearer_prefix(self):
-        with self.assertRaisesRegex(ConfigError, "verified NovalPie"):
-            load_settings(env(CHECKIN_ACTION_PATH="/api/unreviewed"))
+    def test_endpoint_environment_overrides_are_ignored(self):
+        settings = load_settings(
+            env(
+                CHECKIN_BASE_URL="https://untrusted.invalid",
+                CHECKIN_STATUS_PATH="/api/unreviewed-status",
+                CHECKIN_ACTION_PATH="/api/unreviewed-action",
+            )
+        )
+        self.assertEqual(
+            (settings.base_url, settings.status_path, settings.checkin_path),
+            (BASE_URL, STATUS_PATH, ACTION_PATH),
+        )
+
+    def test_rejects_invalid_timezone_and_bearer_prefix(self):
         with self.assertRaisesRegex(ConfigError, "installed IANA timezone"):
             load_settings(env(CHECKIN_TIMEZONE="Shanghai"))
         with self.assertRaisesRegex(ConfigError, "without the Bearer prefix"):

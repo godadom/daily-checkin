@@ -36,7 +36,7 @@ The browser client waits until authentication is available, checks whether `auto
 - `ACCESS_DENIED`: HTTP 403 only with explicit permission-denial semantics; unknown 403 remains `SITE_CHANGED`.
 - `TEMPORARY_ERROR`: bounded network failure, HTTP 429, or recoverable 5xx. An ambiguous POST is never repeated; one status query follows.
 - `SITE_CHANGED`: malformed JSON, HTML/login content, an unclassified status, or missing/contradictory required fields.
-- `CONFIG_ERROR`: missing/invalid environment configuration or a changed verified endpoint.
+- `CONFIG_ERROR`: missing or invalid runtime environment configuration. The verified base URL and endpoint paths are fixed in code and cannot be overridden through the environment.
 - `UNSUPPORTED_SECURITY_CHALLENGE`: CAPTCHA, WAF, device proof, WebAuthn, SMS, or another manual challenge; stop rather than bypass it.
 
 ## Remaining assumptions and limits

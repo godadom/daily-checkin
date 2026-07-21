@@ -8,11 +8,10 @@ For each account it queries today's record with `GET /api/users/me/checkins`, sk
 
 Store secrets in QingLong's protected environment-variable page, never in this repository or the task command.
 
+The verified site address and API paths are built into `src/checkin/config.py`: `https://novalpie.cc` and `/api/users/me/checkins`. Do not create `CHECKIN_BASE_URL`, `CHECKIN_STATUS_PATH`, or `CHECKIN_ACTION_PATH`; environment values with those names are ignored so a token cannot be redirected to another host.
+
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `CHECKIN_BASE_URL` | yes | Must remain `https://novalpie.cc` |
-| `CHECKIN_STATUS_PATH` | yes | Must remain `/api/users/me/checkins` |
-| `CHECKIN_ACTION_PATH` | yes | Must remain `/api/users/me/checkins` |
 | `CHECKIN_TOKEN` | single account | Authorized token value without the `Bearer ` prefix |
 | `CHECKIN_ACCOUNT_NAME` | no | Non-sensitive log alias |
 | `CHECKIN_ACCOUNTS` | multiple accounts | JSON array of token accounts; overrides the single token |
@@ -44,7 +43,7 @@ Offline tests block all sockets. A live run occurs only after a protected token 
 | `ACCESS_DENIED` | The authenticated account received an explicit permission denial. |
 | `TEMPORARY_ERROR` | A bounded timeout, rate limit, or recoverable server error occurred. |
 | `SITE_CHANGED` | The verified endpoint or JSON contract no longer matches. |
-| `CONFIG_ERROR` | A required environment value is missing, malformed, or changed. |
+| `CONFIG_ERROR` | A required environment value is missing or malformed. |
 | `UNSUPPORTED_SECURITY_CHALLENGE` | A manual security challenge was detected and automation stopped. |
 | `INTERNAL_ERROR` | An unclassified internal failure was safely redacted. |
 
