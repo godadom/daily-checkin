@@ -8,7 +8,7 @@ For each account it queries today's record with `GET /api/users/me/checkins`, sk
 
 Store secrets in QingLong's protected environment-variable page, never in this repository or the task command.
 
-The verified site address and API paths are built into `src/checkin/config.py`: `https://novalpie.cc` and `/api/users/me/checkins`. Do not create `CHECKIN_BASE_URL`, `CHECKIN_STATUS_PATH`, or `CHECKIN_ACTION_PATH`; environment values with those names are ignored so a token cannot be redirected to another host.
+The verified site address and API paths are source-controlled in `src/checkin/site_config.py`: `https://novalpie.cc` and `/api/users/me/checkins`. Do not create `CHECKIN_BASE_URL`, `CHECKIN_STATUS_PATH`, or `CHECKIN_ACTION_PATH`; the application rejects those legacy override names so a token cannot be redirected to another host.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |

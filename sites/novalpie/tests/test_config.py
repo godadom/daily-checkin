@@ -3,7 +3,8 @@ from __future__ import annotations
 import json
 import unittest
 
-from checkin.config import ACTION_PATH, BASE_URL, STATUS_PATH, ConfigError, load_settings
+from checkin.config import ConfigError, load_settings
+from checkin.site_config import ACTION_PATH, BASE_URL, STATUS_PATH
 
 
 def env(**overrides):
@@ -21,18 +22,11 @@ class ConfigTests(unittest.TestCase):
         self.assertEqual(settings.accounts[0].auth_type, "bearer")
         self.assertEqual((settings.base_url, settings.status_path, settings.checkin_path), (BASE_URL, STATUS_PATH, ACTION_PATH))
 
-    def test_endpoint_environment_overrides_are_ignored(self):
-        settings = load_settings(
-            env(
-                CHECKIN_BASE_URL="https://untrusted.invalid",
-                CHECKIN_STATUS_PATH="/api/unreviewed-status",
-                CHECKIN_ACTION_PATH="/api/unreviewed-action",
-            )
-        )
-        self.assertEqual(
-            (settings.base_url, settings.status_path, settings.checkin_path),
-            (BASE_URL, STATUS_PATH, ACTION_PATH),
-        )
+    def test_rejects_fixed_site_environment_overrides(self):
+        for name in ("CHECKIN_BASE_URL", "CHECKIN_STATUS_PATH", "CHECKIN_ACTION_PATH"):
+            with self.subTest(name=name):
+                with self.assertRaisesRegex(ConfigError, "built into site_config.py"):
+                    load_settings(env(**{name: "https://untrusted.invalid"}))
 
     def test_rejects_invalid_timezone_and_bearer_prefix(self):
         with self.assertRaisesRegex(ConfigError, "installed IANA timezone"):

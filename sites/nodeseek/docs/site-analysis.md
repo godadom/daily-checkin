@@ -18,6 +18,8 @@
 
 The browser menu's “签到” control only navigates to `/board`; it does not itself submit attendance. The page also offers a random-reward option. NodeSeekX's published `signIn` source maps that option to the same API with `random=true`, while its fixed mode uses `random=false`. The project exposes this choice as `CHECKIN_ATTENDANCE_MODE`, defaulting to `fixed`.
 
+The verified HTTPS origin and all three paths are fixed, non-sensitive site facts stored in `src/checkin/site_config.py`. Runtime environment variables cannot replace them; only the `fixed`/`random` preference selects between the two reviewed action paths.
+
 ## Request contract
 
 - The status request uses the session Cookie supplied at runtime and has no request body.

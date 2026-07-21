@@ -1,4 +1,4 @@
-"""Environment-only configuration for the verified NodeSeek attendance flow."""
+"""Runtime configuration for the verified NodeSeek attendance flow."""
 
 from __future__ import annotations
 
@@ -7,10 +7,10 @@ import os
 import re
 from dataclasses import dataclass
 from typing import Mapping
-from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .models import AccountConfig
+from .site_config import ACTION_PATHS, BASE_URL, FORBIDDEN_OVERRIDE_ENV_NAMES, STATUS_PATH
 
 
 class ConfigError(ValueError):
@@ -19,12 +19,6 @@ class ConfigError(ValueError):
 
 ACCOUNT_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 TIMEZONE_RE = re.compile(r"^[A-Za-z0-9._+-]+(?:/[A-Za-z0-9._+-]+)*$")
-BASE_URL = "https://www.nodeseek.com"
-STATUS_PATH = "/api/attendance/board?page=1"
-ACTION_PATH = "/api/attendance?random=false"
-RANDOM_ACTION_PATH = "/api/attendance?random=true"
-
-
 @dataclass(frozen=True)
 class Settings:
     base_url: str
@@ -93,17 +87,16 @@ def _accounts(env: Mapping[str, str]) -> tuple[AccountConfig, ...]:
     return accounts
 
 
-def _verified_endpoint(env: Mapping[str, str], name: str, expected: str) -> str:
-    value = env.get(name, expected).strip()
-    if value != expected:
-        raise ConfigError(f"{name} must remain the verified NodeSeek endpoint")
-    return value
+def _reject_site_overrides(env: Mapping[str, str]) -> None:
+    present = [name for name in FORBIDDEN_OVERRIDE_ENV_NAMES if name in env]
+    if present:
+        names = ", ".join(present)
+        raise ConfigError(f"remove fixed site override variables: {names}; values are built into site_config.py")
 
 
 def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
     env = os.environ if environ is None else environ
-    if env.get("CHECKIN_BASE_URL", BASE_URL).strip().rstrip("/") != BASE_URL:
-        raise ConfigError("CHECKIN_BASE_URL must be https://www.nodeseek.com")
+    _reject_site_overrides(env)
     timezone = env.get("CHECKIN_TIMEZONE", "Asia/Shanghai").strip()
     if not TIMEZONE_RE.fullmatch(timezone):
         raise ConfigError("CHECKIN_TIMEZONE must name an installed IANA timezone such as Asia/Shanghai")
@@ -119,8 +112,8 @@ def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
         raise ConfigError("CHECKIN_ATTENDANCE_MODE must be fixed or random")
     return Settings(
         base_url=BASE_URL,
-        status_path=_verified_endpoint(env, "CHECKIN_STATUS_PATH", STATUS_PATH),
-        checkin_path=RANDOM_ACTION_PATH if attendance_mode == "random" else ACTION_PATH,
+        status_path=STATUS_PATH,
+        checkin_path=ACTION_PATHS[attendance_mode],
         attendance_mode=attendance_mode,
         accounts=_accounts(env),
         connect_timeout=float(_number(env, "CHECKIN_CONNECT_TIMEOUT", "5", float, 0.1, 120)),

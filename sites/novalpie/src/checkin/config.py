@@ -10,6 +10,7 @@ from typing import Mapping
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 from .models import AccountConfig
+from .site_config import ACTION_PATH, BASE_URL, FORBIDDEN_OVERRIDE_ENV_NAMES, STATUS_PATH
 
 
 class ConfigError(ValueError):
@@ -20,11 +21,6 @@ ACCOUNT_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 PHONE_ALIAS_RE = re.compile(r"^(?:1[3-9]\d{9}|\d{10,15})$")
 FIELD_NAME_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 TIMEZONE_RE = re.compile(r"^[A-Za-z0-9._+-]+(?:/[A-Za-z0-9._+-]+)*$")
-BASE_URL = "https://novalpie.cc"
-STATUS_PATH = "/api/users/me/checkins"
-ACTION_PATH = "/api/users/me/checkins"
-
-
 @dataclass(frozen=True)
 class Settings:
     base_url: str
@@ -100,8 +96,16 @@ def _accounts(env: Mapping[str, str]) -> tuple[AccountConfig, ...]:
     return accounts
 
 
+def _reject_site_overrides(env: Mapping[str, str]) -> None:
+    present = [name for name in FORBIDDEN_OVERRIDE_ENV_NAMES if name in env]
+    if present:
+        names = ", ".join(present)
+        raise ConfigError(f"remove fixed site override variables: {names}; values are built into site_config.py")
+
+
 def load_settings(environ: Mapping[str, str] | None = None) -> Settings:
     env = os.environ if environ is None else environ
+    _reject_site_overrides(env)
     timezone = env.get("CHECKIN_TIMEZONE", "Asia/Shanghai").strip()
     if not TIMEZONE_RE.fullmatch(timezone):
         raise ConfigError("CHECKIN_TIMEZONE must name an installed IANA timezone such as Asia/Shanghai")

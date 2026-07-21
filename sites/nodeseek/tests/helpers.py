@@ -16,9 +16,10 @@ def deny_live_network(*args, **kwargs):
 socket.create_connection = deny_live_network
 
 from checkin.client import HttpResponse, ReliableHttpClient  # noqa: E402
-from checkin.config import ACTION_PATH, BASE_URL, STATUS_PATH, Settings  # noqa: E402
+from checkin.config import Settings  # noqa: E402
 from checkin.models import AccountConfig  # noqa: E402
 from checkin.service import CheckinService  # noqa: E402
+from checkin.site_config import ACTION_PATH, BASE_URL, STATUS_PATH  # noqa: E402
 
 
 class QueueTransport:

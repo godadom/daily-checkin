@@ -9,7 +9,7 @@ python3 -m pip install --disable-pip-version-check -r requirements.txt
 python3 tests/run_offline.py
 ```
 
-The verified base URL and both API paths are built into the code. Do not create `CHECKIN_BASE_URL`, `CHECKIN_STATUS_PATH`, or `CHECKIN_ACTION_PATH`; they are not configuration variables and any inherited values with those names are ignored. For one account, only `CHECKIN_TOKEN` is required; `CHECKIN_ACCOUNT_NAME` is optional. For multiple accounts use one `CHECKIN_ACCOUNTS` JSON value such as `[{"name":"account-a","token":"<REDACTED_TOKEN>"}]` and omit the single-account token. Supply token values without the `Bearer ` prefix. Account aliases must not be phone numbers, emails, or other identifiers.
+The verified base URL and both API paths are source-controlled in `src/checkin/site_config.py`. Do not create `CHECKIN_BASE_URL`, `CHECKIN_STATUS_PATH`, or `CHECKIN_ACTION_PATH`; they are not configuration variables, and inherited values with those names must be removed because the application rejects them. For one account, only `CHECKIN_TOKEN` is required; `CHECKIN_ACCOUNT_NAME` is optional. For multiple accounts use one `CHECKIN_ACCOUNTS` JSON value such as `[{"name":"account-a","token":"<REDACTED_TOKEN>"}]` and omit the single-account token. Supply token values without the `Bearer ` prefix. Account aliases must not be phone numbers, emails, or other identifiers.
 
 After a normal browser login, obtain only your own token from an authorized request's Bearer header and place it directly into QingLong. Never put it in the cron command, repository URL, source code, screenshots, or logs. When it expires, log in normally and replace the protected value; no refresh or login endpoint is invented by this project.
 

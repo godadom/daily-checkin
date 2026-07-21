@@ -6,12 +6,10 @@ It first queries `GET /api/attendance/board?page=1`. A non-null attendance recor
 
 ## Configuration
 
-Set these values in QingLong's protected environment-variable store, never in the task command or repository:
+Store credentials in QingLong's protected environment-variable store, never in the task command or repository. The verified origin and all API paths are source-controlled in `src/checkin/site_config.py`; do not create `CHECKIN_BASE_URL`, `CHECKIN_STATUS_PATH`, or `CHECKIN_ACTION_PATH`. The application rejects those legacy override names so a Cookie cannot be redirected to an unreviewed endpoint.
 
 | Variable | Required | Purpose |
 | --- | --- | --- |
-| `CHECKIN_BASE_URL` | yes | Must remain `https://www.nodeseek.com` |
-| `CHECKIN_STATUS_PATH` | yes | Verified path `/api/attendance/board?page=1` |
 | `CHECKIN_ATTENDANCE_MODE` | no | `fixed` (default, 5 chicken legs) or `random` (“try luck”) |
 | `CHECKIN_COOKIE` | single account | Full authorized Cookie header value |
 | `CHECKIN_ACCOUNT_NAME` | no | Non-sensitive log alias |
@@ -38,7 +36,7 @@ Offline tests deny all sockets. A live run happens only when a valid protected C
 | `ACCESS_DENIED` | An explicit permission-denial response was received. Stop the task and verify account permission or site policy. |
 | `TEMPORARY_ERROR` | Network failure, rate limiting, or 5xx; wait for the next scheduled run. |
 | `SITE_CHANGED` | The verified endpoint or JSON contract no longer matches. Disable the task and refresh sanitized evidence. |
-| `CONFIG_ERROR` | An environment value is missing, malformed, or changed from the verified endpoint. |
+| `CONFIG_ERROR` | A required environment value is missing or malformed, or a forbidden site override is present. |
 | `UNSUPPORTED_SECURITY_CHALLENGE` | A manual security control was detected. Stop instead of bypassing it. |
 
 ## Safety
